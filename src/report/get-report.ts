@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as fs from 'fs'
 import {TestExecutionResult, TestRunResult, TestSuiteResult} from '../test-results'
 import {Align, formatTime, Icon, link, table} from '../utils/markdown-utils'
 import {DEFAULT_LOCALE} from '../utils/node-utils'
@@ -57,9 +58,13 @@ export function getReport(results: TestRunResult[], options: ReportOptions = DEF
 
 function getMaxReportLength(options: ReportOptions = DEFAULT_OPTIONS): number {
   if (options.useActionsSummary) {
-    const currentSummaryContent = core.summary.stringify()
-    const currentSummarySize = getByteLength(currentSummaryContent)
-    return MAX_ACTIONS_SUMMARY_LENGTH - currentSummarySize
+    const summaryFile = process.env.GITHUB_STEP_SUMMARY
+    if(summaryFile && fs.existsSync(summaryFile)) {
+      const stats = fs.statSync(summaryFile)
+      const currentSummarySize = stats.size
+      core.info(`Current GitHub Actions summary size: ${currentSummarySize} bytes`)
+      return MAX_ACTIONS_SUMMARY_LENGTH - currentSummarySize
+    }
   }
   return MAX_REPORT_LENGTH
 }
