@@ -62,10 +62,15 @@ function getMaxReportLength(options: ReportOptions = DEFAULT_OPTIONS): number {
     if(summaryFile && fs.existsSync(summaryFile)) {
       const stats = fs.statSync(summaryFile)
       const currentSummarySize = stats.size
-      core.info(`Current GitHub Actions summary size: ${currentSummarySize} bytes`)
+      core.warning(`Current GitHub Actions summary size: ${currentSummarySize} bytes`)
       return MAX_ACTIONS_SUMMARY_LENGTH - currentSummarySize
     }
+    else {
+      core.warning('GITHUB_STEP_SUMMARY environment variable is not set or file does not exist. Using full limit.')
+      return MAX_ACTIONS_SUMMARY_LENGTH
+    }
   }
+  core.warning('Using full report length limit.')
   return MAX_REPORT_LENGTH
 }
 
