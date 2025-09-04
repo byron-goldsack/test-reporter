@@ -282,6 +282,9 @@ const swift_xunit_parser_1 = __nccwpck_require__(7330);
 const path_utils_1 = __nccwpck_require__(9132);
 const github_utils_1 = __nccwpck_require__(6667);
 async function main() {
+    // Debug log to verify custom action is loaded
+    core.info('=== CUSTOM FORK ACTION LOADED - ALLOWEXISTINGSUMMARY VERSION ===');
+    console.log('=== CUSTOM FORK ACTION LOADED - ALLOWEXISTINGSUMMARY VERSION ===');
     try {
         const testReporter = new TestReporter();
         await testReporter.run();
@@ -328,6 +331,7 @@ class TestReporter {
         }
     }
     async run() {
+        core.info('=== CUSTOM FORK: TestReporter.run() starting ===');
         if (this.workDirInput) {
             core.info(`Changing directory to '${this.workDirInput}'`);
             process.chdir(this.workDirInput);
@@ -1910,6 +1914,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DEFAULT_OPTIONS = void 0;
 exports.getReport = getReport;
 const core = __importStar(__nccwpck_require__(7484));
+const fs = __importStar(__nccwpck_require__(9896));
 const markdown_utils_1 = __nccwpck_require__(5129);
 const node_utils_1 = __nccwpck_require__(5384);
 const parse_utils_1 = __nccwpck_require__(9633);
@@ -1947,7 +1952,23 @@ function getReport(results, options = exports.DEFAULT_OPTIONS) {
     return trimReport(lines, options);
 }
 function getMaxReportLength(options = exports.DEFAULT_OPTIONS) {
-    return options.useActionsSummary ? MAX_ACTIONS_SUMMARY_LENGTH : MAX_REPORT_LENGTH;
+    core.info('=== CUSTOM FORK: getMaxReportLength called ===');
+    core.info(`=== useActionsSummary: ${options.useActionsSummary} ===`);
+    if (options.useActionsSummary) {
+        const summaryFile = process.env.GITHUB_STEP_SUMMARY;
+        if (summaryFile && fs.existsSync(summaryFile)) {
+            const stats = fs.statSync(summaryFile);
+            const currentSummarySize = stats.size;
+            core.warning(`Current GitHub Actions summary size: ${currentSummarySize} bytes`);
+            return MAX_ACTIONS_SUMMARY_LENGTH - currentSummarySize;
+        }
+        else {
+            core.warning('GITHUB_STEP_SUMMARY environment variable is not set or file does not exist. Using full limit.');
+            return MAX_ACTIONS_SUMMARY_LENGTH;
+        }
+    }
+    core.warning('Using full report length limit.');
+    return MAX_REPORT_LENGTH;
 }
 function trimReport(lines, options) {
     const closingBlock = '```';

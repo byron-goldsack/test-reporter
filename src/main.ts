@@ -24,6 +24,10 @@ import {normalizeDirPath, normalizeFilePath} from './utils/path-utils'
 import {getCheckRunContext} from './utils/github-utils'
 
 async function main(): Promise<void> {
+  // Debug log to verify custom action is loaded
+  core.info('=== CUSTOM FORK ACTION LOADED - ALLOWEXISTINGSUMMARY VERSION ===')
+  console.log('=== CUSTOM FORK ACTION LOADED - ALLOWEXISTINGSUMMARY VERSION ===')
+  
   try {
     const testReporter = new TestReporter()
     await testReporter.run()
@@ -73,6 +77,8 @@ class TestReporter {
   }
 
   async run(): Promise<void> {
+    core.info('=== CUSTOM FORK: TestReporter.run() starting ===')
+    
     if (this.workDirInput) {
       core.info(`Changing directory to '${this.workDirInput}'`)
       process.chdir(this.workDirInput)

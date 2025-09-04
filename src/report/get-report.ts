@@ -57,6 +57,9 @@ export function getReport(results: TestRunResult[], options: ReportOptions = DEF
 }
 
 function getMaxReportLength(options: ReportOptions = DEFAULT_OPTIONS): number {
+  core.info('=== CUSTOM FORK: getMaxReportLength called ===')
+  core.info(`=== useActionsSummary: ${options.useActionsSummary} ===`)
+  
   if (options.useActionsSummary) {
     const summaryFile = process.env.GITHUB_STEP_SUMMARY
     if(summaryFile && fs.existsSync(summaryFile)) {
